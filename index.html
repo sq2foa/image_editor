@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="manifest" href="manifest.json">
+  <script src="filters.js"></script>
+</head>
+<body>
+<img id="src" src="images/imgsrc.jpg" style="display:none">
+<canvas id="filter"></canvas>
+<fieldset>
+  <legend>Emboss</legend>
+  <input type="button" value="Positive" onclick="onEmboss('P')">
+  <input type="button" value="Negative" onclick="onEmboss('N')">
+</fieldset>
+<fieldset>
+  <legend>Image</legend>
+  <input type="checkbox" value="Inverse" onclick="onInverse()">Inverse
+</fieldset>
+<fieldset>
+  <legend>Image</legend>
+  Brightness <input type="range" min="-100" max="100" value="0" onchange="onBright(this)"><br>
+  Contrast <input type="range" min="-100" max="100" value="0" onchange="onContrast(this)"><br>
+  Gamma Correction <input type="range" min="10" max="300" value="100" onchange="onGamma(this)"><br>
+</fieldset>
+<fieldset>
+  <legend>RGB</legend>
+  R <input type="range" min="-100" max="100" value="0" onchange="onRGB(this,'R')"><br>
+  G <input type="range" min="-100" max="100" value="0" onchange="onRGB(this,'G')"><br>
+  B <input type="range" min="-100" max="100" value="0" onchange="onRGB(this,'B')"><br>
+</fieldset>
+<fieldset>
+  <legend>RGB</legend>
+  All <input type="radio" name="color" value="X" onchange="onGray('')"><br>
+  R <input type="radio" name="color" value="R" onchange="onGray('R')"><br>
+  G <input type="radio" name="color" value="G" onchange="onGray('G')"><br>
+  B <input type="radio" name="color" value="B" onchange="onGray('B')"><br>
+</fieldset>
+<script>
+var filters = {
+  emboss: '',
+  inverse: false,
+  bright: 0,
+  contrast: 1,
+  gamma: 1,
+  R:1,G:1,B:1,
+  graychannel: ''
+};
+function onRGB(n, c) {
+  filters[c] = (+n.value+100)/100.0;
+  processing();
+}
+function onGray(c) {
+  filters.graychannel = c;
+  processing();
+}
+function onInverse() {
+  filters.inverse = !filters.inverse;
+  processing();
+}
+function onBright(n) {
+  filters.bright = n.value/100.0;
+  console.log(filters.bright);
+  processing();
+}
+function onContrast(n) {
+  filters.contrast = (+n.value+100.0)/100.0;
+  processing();
+}
+function onGamma(n) {
+  filters.gamma = n.value/100.0;
+  processing();
+}
+
+function onEmboss(n) {
+  if (filters.emboss == n) filters.emboss = '';
+  else filters.emboss = n;
+  processing();
+}
+
+function processing() {
+  initImage();
+  runFilter("filter", Filters.emboss, filters.emboss);
+  runFilter("filter", Filters.grayscalechannel, filters.graychannel);
+  runFilter("filter", Filters.doFilters, filters);
+}
+
+function runFilter(id, filter, arg1, arg2, arg3) {
+  var img = document.getElementById("filter");
+  var idata = Filters.filterImage(filter, img, arg1, arg2, arg3);
+  var c = document.getElementById(id);
+  c.width = idata.width;
+  c.height = idata.height;
+  var ctx = c.getContext('2d');
+  ctx.putImageData(idata, 0, 0);
+}
+
+function initImage2() {
+  //var img = document.getElementById('src');
+  //img.crossOrigin = "Anonymous";
+  //img.setAttribute('crossOrigin', '');
+//  ctx.drawImage(img, 0, 0);
+  var img = new Image;
+ // img.crossOrigin = "anonymous";
+  img.onload = function(){
+    var c = document.getElementById("filter");
+    c.width = img.width;
+    c.height = img.height;
+    var ctx = c.getContext('2d');
+    ctx.drawImage(img,0,0); // Or at whatever offset you like
+  };
+  img.src =  "apple.jpg";
+}
+function initImage() {
+  var img = document.getElementById('src');
+  var c = document.getElementById("filter");
+  c.width = img.width;
+  c.height = img.height;
+  var ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+}
+initImage();
+</script>
+</body>
+</html>
